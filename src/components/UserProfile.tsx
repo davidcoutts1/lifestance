@@ -7,7 +7,6 @@ import { formatDate } from '../utils';
 const UserProfile: React.FC = () => {
   const { currentUser, setCurrentUser, people, updatePerson } = useApp();
   const [isEditing, setIsEditing] = useState(false);
-  const [selectedPerson, setSelectedPerson] = useState(currentUser?.id || '');
   const [customSkill, setCustomSkill] = useState('');
   const [editForm, setEditForm] = useState({
     email: currentUser?.email || '',
@@ -20,7 +19,6 @@ const UserProfile: React.FC = () => {
     const person = people.find(p => p.id === personId);
     if (person) {
       setCurrentUser(person);
-      setSelectedPerson(personId);
       setEditForm({
         email: person.email,
         role: person.role,
@@ -67,12 +65,6 @@ const UserProfile: React.FC = () => {
     }
     setIsEditing(false);
   };
-
-  const userProjects = currentUser
-    ? currentUser.currentProjects.map(projectId =>
-        people.find(p => p.currentProjects.includes(projectId))
-      )
-    : [];
 
   const skillsByCategory = DEFAULT_SKILLS.reduce((acc, skill) => {
     if (!acc[skill.category]) {
