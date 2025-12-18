@@ -189,39 +189,49 @@ const Dashboard: React.FC = () => {
             {upcomingDeadlines.length === 0 ? (
               <p className="text-gray-500 text-center py-8">No upcoming deadlines</p>
             ) : (
-              upcomingDeadlines.map(task => (
-                <div
-                  key={task.id}
-                  className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
-                >
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <h4 className="font-medium text-gray-900">{task.title}</h4>
-                      <p className="text-sm text-gray-600 mt-1">{task.projectName}</p>
-                      <div className="flex items-center space-x-2 mt-2">
-                        <span
-                          className={`text-xs px-2 py-1 rounded-full ${getPriorityColor(
-                            task.priority
-                          )}`}
-                        >
-                          {task.priority}
-                        </span>
-                        {task.dueDate && isOverdue(task.dueDate) && (
-                          <span className="text-xs px-2 py-1 rounded-full bg-red-100 text-red-800">
-                            Overdue
-                          </span>
+              upcomingDeadlines.map(task => {
+                const assignedPerson = task.assignedTo
+                  ? people.find(p => p.id === task.assignedTo)
+                  : null;
+                return (
+                  <div
+                    key={task.id}
+                    className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <h4 className="font-medium text-gray-900">{task.title}</h4>
+                        <p className="text-sm text-gray-600 mt-1">{task.projectName}</p>
+                        {assignedPerson && (
+                          <p className="text-xs text-gray-500 mt-1">
+                            Assigned to: {assignedPerson.name}
+                          </p>
                         )}
+                        <div className="flex items-center space-x-2 mt-2">
+                          <span
+                            className={`text-xs px-2 py-1 rounded-full ${getPriorityColor(
+                              task.priority
+                            )}`}
+                          >
+                            {task.priority}
+                          </span>
+                          {task.dueDate && isOverdue(task.dueDate) && (
+                            <span className="text-xs px-2 py-1 rounded-full bg-red-100 text-red-800">
+                              Overdue
+                            </span>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                    <div className="text-right ml-4">
-                      <Calendar className="w-5 h-5 text-gray-400 mb-1" />
-                      <div className="text-xs text-gray-600">
-                        {task.dueDate && formatDate(task.dueDate)}
+                      <div className="text-right ml-4">
+                        <Calendar className="w-5 h-5 text-gray-400 mb-1" />
+                        <div className="text-xs text-gray-600">
+                          {task.dueDate && formatDate(task.dueDate)}
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              ))
+                );
+              })
             )}
           </div>
         </div>

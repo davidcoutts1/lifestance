@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Person, Project, TimeEntry, Task } from './types';
+import { calculateProjectProgress } from './utils';
 
 interface AppState {
   people: Person[];
@@ -154,43 +155,56 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const addTask = (projectId: string, task: Task) => {
     setState(prev => ({
       ...prev,
-      projects: prev.projects.map(p =>
-        p.id === projectId
-          ? { ...p, tasks: [...p.tasks, task], updatedAt: new Date().toISOString() }
-          : p
-      ),
+      projects: prev.projects.map(p => {
+        if (p.id === projectId) {
+          const updatedTasks = [...p.tasks, task];
+          return {
+            ...p,
+            tasks: updatedTasks,
+            progress: calculateProjectProgress(updatedTasks),
+            updatedAt: new Date().toISOString(),
+          };
+        }
+        return p;
+      }),
     }));
   };
 
   const updateTask = (projectId: string, taskId: string, updates: Partial<Task>) => {
     setState(prev => ({
       ...prev,
-      projects: prev.projects.map(p =>
-        p.id === projectId
-          ? {
-              ...p,
-              tasks: p.tasks.map(t =>
-                t.id === taskId ? { ...t, ...updates } : t
-              ),
-              updatedAt: new Date().toISOString(),
-            }
-          : p
-      ),
+      projects: prev.projects.map(p => {
+        if (p.id === projectId) {
+          const updatedTasks = p.tasks.map(t =>
+            t.id === taskId ? { ...t, ...updates } : t
+          );
+          return {
+            ...p,
+            tasks: updatedTasks,
+            progress: calculateProjectProgress(updatedTasks),
+            updatedAt: new Date().toISOString(),
+          };
+        }
+        return p;
+      }),
     }));
   };
 
   const deleteTask = (projectId: string, taskId: string) => {
     setState(prev => ({
       ...prev,
-      projects: prev.projects.map(p =>
-        p.id === projectId
-          ? {
-              ...p,
-              tasks: p.tasks.filter(t => t.id !== taskId),
-              updatedAt: new Date().toISOString(),
-            }
-          : p
-      ),
+      projects: prev.projects.map(p => {
+        if (p.id === projectId) {
+          const updatedTasks = p.tasks.filter(t => t.id !== taskId);
+          return {
+            ...p,
+            tasks: updatedTasks,
+            progress: calculateProjectProgress(updatedTasks),
+            updatedAt: new Date().toISOString(),
+          };
+        }
+        return p;
+      }),
     }));
   };
 
