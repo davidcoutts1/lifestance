@@ -34,7 +34,7 @@ export interface Task {
   description: string;
   status: 'todo' | 'in-progress' | 'review' | 'done';
   priority: 'low' | 'medium' | 'high' | 'critical';
-  assignedTo?: string;
+  assignedTo?: string[];
   estimatedHours: number;
   actualHours: number;
   dueDate?: string;

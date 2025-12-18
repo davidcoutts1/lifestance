@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useApp } from '../store';
-import { Person } from '../types';
+import { Person, DEFAULT_SKILLS } from '../types';
 import { Plus, Search, Edit2, Trash2, Mail, Briefcase, Award, Calendar } from 'lucide-react';
 import { generateId, formatDate } from '../utils';
 
@@ -9,6 +9,7 @@ const Team: React.FC = () => {
   const [showModal, setShowModal] = useState(false);
   const [editingPerson, setEditingPerson] = useState<Person | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [customSkill, setCustomSkill] = useState('');
 
   const [formData, setFormData] = useState({
     name: '',
@@ -17,6 +18,14 @@ const Team: React.FC = () => {
     skills: [] as string[],
     availability: '40',
   });
+
+  const skillsByCategory = DEFAULT_SKILLS.reduce((acc, skill) => {
+    if (!acc[skill.category]) {
+      acc[skill.category] = [];
+    }
+    acc[skill.category].push(skill.name);
+    return acc;
+  }, {} as Record<string, string[]>);
 
   const handleOpenModal = (person?: Person) => {
     if (person) {
@@ -73,14 +82,23 @@ const Team: React.FC = () => {
     }
   };
 
-  const handleAddSkill = (skill: string) => {
-    if (skill && !formData.skills.includes(skill)) {
-      setFormData({ ...formData, skills: [...formData.skills, skill] });
-    }
+  const handleToggleSkill = (skill: string) => {
+    setFormData(prev => ({
+      ...prev,
+      skills: prev.skills.includes(skill)
+        ? prev.skills.filter(s => s !== skill)
+        : [...prev.skills, skill],
+    }));
   };
 
-  const handleRemoveSkill = (skill: string) => {
-    setFormData({ ...formData, skills: formData.skills.filter(s => s !== skill) });
+  const handleAddCustomSkill = () => {
+    if (customSkill.trim() && !formData.skills.includes(customSkill.trim())) {
+      setFormData(prev => ({
+        ...prev,
+        skills: [...prev.skills, customSkill.trim()],
+      }));
+      setCustomSkill('');
+    }
   };
 
   const filteredPeople = people.filter(
@@ -122,7 +140,7 @@ const Team: React.FC = () => {
           {filteredPeople.map(person => {
             const personProjects = projects.filter(p => p.teamMembers.includes(person.id));
             const completedTasks = personProjects.reduce(
-              (sum, p) => sum + p.tasks.filter(t => t.assignedTo === person.id && t.status === 'done').length,
+              (sum, p) => sum + p.tasks.filter(t => t.assignedTo?.includes(person.id) && t.status === 'done').length,
               0
             );
 
@@ -272,7 +290,59 @@ const Team: React.FC = () => {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Skills</label>
-                <div className="flex flex-wrap gap-2 mb-2">
+
+                <div className="mb-4 max-h-96 overflow-y-auto border border-gray-300 rounded-lg p-4 bg-gray-50">
+                  <h5 className="font-medium mb-3 text-gray-700">Select Skills</h5>
+                  {Object.entries(skillsByCategory).map(([category, skills]) => (
+                    <div key={category} className="mb-4">
+                      <h6 className="text-sm font-medium text-gray-600 mb-2">{category}</h6>
+                      <div className="flex flex-wrap gap-2">
+                        {skills.map(skill => (
+                          <button
+                            key={skill}
+                            type="button"
+                            onClick={() => handleToggleSkill(skill)}
+                            className={`px-3 py-1 rounded-full text-sm font-medium transition-all ${
+                              formData.skills.includes(skill)
+                                ? 'bg-primary-500 text-white'
+                                : 'bg-white border border-gray-300 text-gray-700 hover:border-primary-500'
+                            }`}
+                          >
+                            {skill}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+
+                  <div className="mt-4 pt-4 border-t border-gray-300">
+                    <h6 className="text-sm font-medium text-gray-600 mb-2">Add Custom Skill</h6>
+                    <div className="flex space-x-2">
+                      <input
+                        type="text"
+                        value={customSkill}
+                        onChange={e => setCustomSkill(e.target.value)}
+                        onKeyPress={e => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            handleAddCustomSkill();
+                          }
+                        }}
+                        placeholder="Enter skill name"
+                        className="input-field flex-1"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleAddCustomSkill}
+                        className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+                      >
+                        Add
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap gap-2">
                   {formData.skills.map(skill => (
                     <span
                       key={skill}
@@ -281,7 +351,7 @@ const Team: React.FC = () => {
                       <span>{skill}</span>
                       <button
                         type="button"
-                        onClick={() => handleRemoveSkill(skill)}
+                        onClick={() => handleToggleSkill(skill)}
                         className="text-primary-600 hover:text-primary-800"
                       >
                         ×
@@ -289,20 +359,6 @@ const Team: React.FC = () => {
                     </span>
                   ))}
                 </div>
-                <input
-                  type="text"
-                  placeholder="Type a skill and press Enter"
-                  className="input-field"
-                  onKeyPress={e => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault();
-                      const input = e.target as HTMLInputElement;
-                      handleAddSkill(input.value.trim());
-                      input.value = '';
-                    }
-                  }}
-                />
-                <p className="text-xs text-gray-500 mt-1">Press Enter to add each skill</p>
               </div>
 
               <div className="flex justify-end space-x-3 pt-4">

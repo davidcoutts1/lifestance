@@ -44,7 +44,7 @@ const Dashboard: React.FC = () => {
     ? projects
         .flatMap(p =>
           p.tasks
-            .filter(t => t.assignedTo === currentUser.id && t.status !== 'done')
+            .filter(t => t.assignedTo?.includes(currentUser.id) && t.status !== 'done')
             .map(task => ({ ...task, projectName: p.name }))
         )
         .slice(0, 5)
@@ -190,9 +190,9 @@ const Dashboard: React.FC = () => {
               <p className="text-gray-500 text-center py-8">No upcoming deadlines</p>
             ) : (
               upcomingDeadlines.map(task => {
-                const assignedPerson = task.assignedTo
-                  ? people.find(p => p.id === task.assignedTo)
-                  : null;
+                const assignedPeople = task.assignedTo
+                  ? task.assignedTo.map(id => people.find(p => p.id === id)).filter(Boolean)
+                  : [];
                 return (
                   <div
                     key={task.id}
@@ -202,10 +202,20 @@ const Dashboard: React.FC = () => {
                       <div className="flex-1">
                         <h4 className="font-medium text-gray-900">{task.title}</h4>
                         <p className="text-sm text-gray-600 mt-1">{task.projectName}</p>
-                        {assignedPerson && (
-                          <p className="text-xs text-gray-500 mt-1">
-                            Assigned to: {assignedPerson.name}
-                          </p>
+                        {assignedPeople.length > 0 && (
+                          <div className="mt-1">
+                            <span className="text-xs text-gray-500">Assigned to: </span>
+                            <div className="flex flex-wrap gap-1 mt-1">
+                              {assignedPeople.map(person => (
+                                <span
+                                  key={person!.id}
+                                  className="text-xs px-2 py-0.5 bg-blue-100 text-blue-700 rounded"
+                                >
+                                  {person!.name}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
                         )}
                         <div className="flex items-center space-x-2 mt-2">
                           <span

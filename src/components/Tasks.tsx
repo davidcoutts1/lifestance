@@ -17,7 +17,7 @@ const Tasks: React.FC = () => {
     description: '',
     status: 'todo' as Task['status'],
     priority: 'medium' as Task['priority'],
-    assignedTo: '',
+    assignedTo: [] as string[],
     estimatedHours: '',
     dueDate: '',
   });
@@ -31,7 +31,7 @@ const Tasks: React.FC = () => {
         description: task.description,
         status: task.status,
         priority: task.priority,
-        assignedTo: task.assignedTo || '',
+        assignedTo: task.assignedTo || [],
         estimatedHours: task.estimatedHours.toString(),
         dueDate: task.dueDate?.split('T')[0] || '',
       });
@@ -43,7 +43,7 @@ const Tasks: React.FC = () => {
         description: '',
         status: 'todo',
         priority: 'medium',
-        assignedTo: '',
+        assignedTo: [],
         estimatedHours: '',
         dueDate: '',
       });
@@ -65,6 +65,7 @@ const Tasks: React.FC = () => {
         ...formData,
         estimatedHours: parseFloat(formData.estimatedHours) || 0,
         dueDate: formData.dueDate || undefined,
+        assignedTo: formData.assignedTo.length > 0 ? formData.assignedTo : undefined,
       });
     } else {
       if (!selectedProject) return;
@@ -73,7 +74,7 @@ const Tasks: React.FC = () => {
         ...formData,
         estimatedHours: parseFloat(formData.estimatedHours) || 0,
         actualHours: 0,
-        assignedTo: formData.assignedTo || undefined,
+        assignedTo: formData.assignedTo.length > 0 ? formData.assignedTo : undefined,
         dueDate: formData.dueDate || undefined,
         createdAt: now,
         dependencies: [],
@@ -82,6 +83,15 @@ const Tasks: React.FC = () => {
       addTask(selectedProject, newTask);
     }
     handleCloseModal();
+  };
+
+  const handleToggleAssignee = (personId: string) => {
+    setFormData(prev => ({
+      ...prev,
+      assignedTo: prev.assignedTo.includes(personId)
+        ? prev.assignedTo.filter(id => id !== personId)
+        : [...prev.assignedTo, personId],
+    }));
   };
 
   const handleDelete = (projectId: string, taskId: string) => {
@@ -174,9 +184,9 @@ const Tasks: React.FC = () => {
 
               <div className="space-y-3">
                 {tasks.map(task => {
-                  const assignedPerson = task.assignedTo
-                    ? people.find(p => p.id === task.assignedTo)
-                    : null;
+                  const assignedPeople = task.assignedTo
+                    ? task.assignedTo.map(id => people.find(p => p.id === id)).filter(Boolean)
+                    : [];
 
                   return (
                     <div
@@ -222,10 +232,22 @@ const Tasks: React.FC = () => {
                         )}
                       </div>
 
-                      {assignedPerson && (
-                        <div className="flex items-center text-xs text-gray-600 mb-2">
-                          <User className="w-3 h-3 mr-1" />
-                          {assignedPerson.name}
+                      {assignedPeople.length > 0 && (
+                        <div className="mb-2">
+                          <div className="flex items-center text-xs text-gray-600 mb-1">
+                            <User className="w-3 h-3 mr-1" />
+                            Assigned to:
+                          </div>
+                          <div className="flex flex-wrap gap-1">
+                            {assignedPeople.map(person => (
+                              <span
+                                key={person!.id}
+                                className="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded-full"
+                              >
+                                {person!.name}
+                              </span>
+                            ))}
+                          </div>
                         </div>
                       )}
 
@@ -340,25 +362,49 @@ const Tasks: React.FC = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Assign To
-                  </label>
-                  <select
-                    value={formData.assignedTo}
-                    onChange={e => setFormData({ ...formData, assignedTo: e.target.value })}
-                    className="input-field"
-                  >
-                    <option value="">Unassigned</option>
-                    {people.map(person => (
-                      <option key={person.id} value={person.id}>
-                        {person.name}
-                      </option>
-                    ))}
-                  </select>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Assign To (select multiple)
+                </label>
+                <div className="max-h-64 overflow-y-auto border border-gray-300 rounded-lg p-3 bg-gray-50">
+                  {people.map(person => (
+                    <label
+                      key={person.id}
+                      className="flex items-start space-x-3 p-2 hover:bg-gray-100 rounded cursor-pointer mb-2"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={formData.assignedTo.includes(person.id)}
+                        onChange={() => handleToggleAssignee(person.id)}
+                        className="mt-1 rounded text-primary-600 focus:ring-primary-500"
+                      />
+                      <div className="flex-1">
+                        <div className="font-medium text-gray-900">{person.name}</div>
+                        <div className="text-xs text-gray-600">{person.role}</div>
+                        {person.skills.length > 0 && (
+                          <div className="flex flex-wrap gap-1 mt-1">
+                            {person.skills.slice(0, 5).map(skill => (
+                              <span
+                                key={skill}
+                                className="text-xs px-2 py-0.5 bg-primary-100 text-primary-700 rounded"
+                              >
+                                {skill}
+                              </span>
+                            ))}
+                            {person.skills.length > 5 && (
+                              <span className="text-xs text-gray-500">
+                                +{person.skills.length - 5} more
+                              </span>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </label>
+                  ))}
                 </div>
+              </div>
 
+              <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Estimated Hours
@@ -373,18 +419,18 @@ const Tasks: React.FC = () => {
                     min="0"
                   />
                 </div>
-              </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Due Date (Optional)
-                </label>
-                <input
-                  type="date"
-                  value={formData.dueDate}
-                  onChange={e => setFormData({ ...formData, dueDate: e.target.value })}
-                  className="input-field"
-                />
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Due Date (Optional)
+                  </label>
+                  <input
+                    type="date"
+                    value={formData.dueDate}
+                    onChange={e => setFormData({ ...formData, dueDate: e.target.value })}
+                    className="input-field"
+                  />
+                </div>
               </div>
 
               <div className="flex justify-end space-x-3 pt-4">
