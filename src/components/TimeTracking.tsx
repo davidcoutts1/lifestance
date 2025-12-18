@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useApp } from '../store';
 import { TimeEntry } from '../types';
-import { Plus, Clock, Calendar, DollarSign, TrendingUp, Download } from 'lucide-react';
+import { Plus, Clock, DollarSign, TrendingUp, Download } from 'lucide-react';
 import { generateId, formatDate } from '../utils';
 
 const TimeTracking: React.FC = () => {

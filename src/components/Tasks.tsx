@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useApp } from '../store';
 import { Task } from '../types';
 import { Plus, Search, Edit2, Trash2, User, Calendar, Clock } from 'lucide-react';
-import { generateId, formatDate, getStatusColor, getPriorityColor, isOverdue } from '../utils';
+import { generateId, formatDate, getPriorityColor, isOverdue } from '../utils';
 
 const Tasks: React.FC = () => {
   const { projects, addTask, updateTask, deleteTask, people } = useApp();

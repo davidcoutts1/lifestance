@@ -121,7 +121,6 @@ const Team: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredPeople.map(person => {
             const personProjects = projects.filter(p => p.teamMembers.includes(person.id));
-            const totalTasks = personProjects.reduce((sum, p) => sum + p.tasks.length, 0);
             const completedTasks = personProjects.reduce(
               (sum, p) => sum + p.tasks.filter(t => t.assignedTo === person.id && t.status === 'done').length,
               0

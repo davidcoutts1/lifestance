@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useApp } from '../store';
 import { Project } from '../types';
-import { Plus, Search, Filter, Edit2, Trash2, Users, Calendar, DollarSign } from 'lucide-react';
+import { Plus, Search, Edit2, Trash2, Users, Calendar, DollarSign } from 'lucide-react';
 import { generateId, formatDate, getStatusColor, getPriorityColor, calculateProjectProgress } from '../utils';
 
 const Projects: React.FC = () => {

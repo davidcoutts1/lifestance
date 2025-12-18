@@ -1,7 +1,6 @@
 import React from 'react';
 import { useApp } from '../store';
 import {
-  TrendingUp,
   Users,
   FolderKanban,
   CheckSquare,

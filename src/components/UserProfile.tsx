@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useApp } from '../store';
-import { DEFAULT_SKILLS, SKILL_CATEGORIES } from '../types';
+import { DEFAULT_SKILLS } from '../types';
 import { User, Mail, Briefcase, Calendar, Award, Edit2, Save, X } from 'lucide-react';
 import { formatDate } from '../utils';
 

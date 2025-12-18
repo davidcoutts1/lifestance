@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { AppProvider } from './store';
 import Dashboard from './components/Dashboard';
 import UserProfile from './components/UserProfile';
